@@ -1,25 +1,75 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
+import Login from '@/views/Login.vue'
+import store from './store';
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: Home
+      name: 'Login',
+      component: Login,
+      meta: {
+        requiresVisitor: true
+      }
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
-    }
+      path: '/',
+      component: () => import('./views/Dashboard.vue'),
+      children: [
+        {
+          path: 'citizen',
+          name: 'Citizen',
+          component: () => import('./views/Citizen.vue'),
+          meta: {
+            requiresAuthenticated: true
+          }
+        },
+        {
+          path: 'fire-stations',
+          name: 'Fire Stations',
+          component: () => import('./views/FireStation.vue'),
+          meta: {
+            requiresAuthenticated: true
+          }
+        },
+        {
+          path: 'login-history',
+          name: 'Login History',
+          component: () => import('./views/LoginHistory.vue'),
+          meta: {
+            requiresAuthenticated: true
+          }
+        }
+      ],
+    },
   ]
 })
+
+router.beforeEach((to, from, next) => {
+  if(to.matched.some(record => record.meta.requiresAuthenticated)) {
+    if(!store.getters.loggedIn) {
+      next({ name: 'Login' })
+    } else {
+      next()
+    }
+  } else if(to.matched.some(record => record.meta.requiresVisitor)) {
+    if(store.getters.loggedIn) {
+      next({ name: 'Citizen' })
+    } else {
+      next()
+    }
+  } else {
+    if(store.getters.loggedIn) {
+      next({ name: 'Citizen' })
+    } else {
+      next({ name: 'Login' })
+    }
+  }
+})
+
+export default router
