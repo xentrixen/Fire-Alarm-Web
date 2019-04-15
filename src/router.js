@@ -38,6 +38,30 @@ const router = new Router({
           }
         },
         {
+          path: 'fire-hydrants',
+          name: 'Fire Hydrants',
+          component: () => import('./views/FireHydrant.vue'),
+          meta: {
+            requiresAuthenticated: true
+          }
+        },
+        {
+          path: 'fire-reports',
+          name: 'Fire Reports',
+          component: () => import('./views/FireReport.vue'),
+          meta: {
+            requiresAuthenticated: true
+          }
+        },
+        {
+          path: 'fire-report-histories',
+          name: 'Fire Report History',
+          component: () => import('./views/FireReportHistory.vue'),
+          meta: {
+            requiresAuthenticated: true
+          }
+        },
+        {
           path: 'login-history',
           name: 'Login History',
           component: () => import('./views/LoginHistory.vue'),

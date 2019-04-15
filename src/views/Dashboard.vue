@@ -69,7 +69,10 @@ export default {
 			drawer: null,
 			items: [
 				{ icon: 'people', text: 'Citizen', route: 'Citizen' },
-				{ icon: 'contacts', text: 'Fire Stations', route: 'Fire Stations' },
+				{ icon: 'location_on', text: 'Fire Stations', route: 'Fire Stations' },
+				{ icon: 'opacity', text: 'Fire Hydrants', route: 'Fire Hydrants' },
+				{ icon: 'report', text: 'Fire Reports', route: 'Fire Reports' },
+				{ icon: 'whatshot', text: 'Fire Report History', route: 'Fire Report History' },
 				{ icon: 'history', text: 'Login History', route: 'Login History' },
 			]
 		}
