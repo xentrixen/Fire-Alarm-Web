@@ -2,8 +2,6 @@
 	<div>
 		<v-layout class="mb-3" align-center>
 			<h1 class="headline font-weight-medium">Fire Reports</h1>
-			<v-spacer></v-spacer>
-			<v-btn small class="ma-0" color="teal" dark @click="refresh">Refresh</v-btn>
 		</v-layout>
 
 		<v-card>
@@ -127,6 +125,8 @@
 </template>
 
 <script>
+import Pusher from 'pusher-js'
+
 export default {
 	data() {
 		return {
@@ -167,6 +167,7 @@ export default {
 			.finally(() => {
 				this.loading = false
 			})
+		this.subscribe()
 	},
 	watch: {
 		viewDialog(value) {
@@ -191,6 +192,23 @@ export default {
 		}	
 	},
 	methods: {
+		subscribe() {
+			let pusher = new Pusher('b98c896342b90b17345b', { cluster: 'ap1' })
+			pusher.subscribe('fire-reports')
+			pusher.bind('fire-report-event', data => {
+				switch(data.eventType) {
+					case 'updated':
+						this.$set(this.items, this.items.findIndex(x => x.id == data.fireReport.id), data.fireReport)
+						break
+					case 'deleted':
+						this.items.splice(this.items.findIndex(x => x.id == data.fireReport.id), 1)
+						break
+					case 'created':
+						this.items.push(data.fireReport)
+						break
+				}
+			})
+		},
 		getValueFromObject(object, path, subpath, join = true) {
 			let returnValue = object
 			for(let i = 0, array = path.split('.'), length = array.length; i < length; i++) {
@@ -210,21 +228,6 @@ export default {
 				}
 			}
 			return join && Array.isArray(returnValue) ? returnValue.join(", ") : returnValue
-		},
-		refresh() {
-			this.items = []
-			this.loading = true
-
-			window.axios.get('/fire-reports')
-				.then(response => {
-					this.items = response.data
-				})
-				.catch(error => {
-					this.$vueOnToast.pop('error', 'Error', error.response ? error.response.data.message : 'An Error Has Occurred')
-				})
-				.finally(() => {
-					this.loading = false
-				})
 		},
 		showViewDialog(object) {
 			this.selected = object
@@ -266,7 +269,6 @@ export default {
 								.then(response => {
 									this.updateDialog = false
 									this.$vueOnToast.pop('success', 'Success', response.data.message)
-									this.refresh()
 								})
 								.catch(error => {
 									if(error.response && "errors" in error.response.data) {
@@ -300,7 +302,6 @@ export default {
 					.then(response => {
 						this.deleteDialog = false
 						this.$vueOnToast.pop('success', 'Success', response.data.message)
-						this.refresh()
 					})
 					.catch(error => {
 						this.deleteDialog = false
